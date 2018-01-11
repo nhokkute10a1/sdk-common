@@ -1,0 +1,12 @@
+F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\obj\Debug\SDK.DownloadManager.csprojResolveAssemblyReference.cache
+F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\obj\Debug\SDK.DownloadManager.csproj.CoreCompileInputs.cache
+F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\bin\Debug\SDK.DownloadManager.dll
+F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\bin\Debug\SDK.DownloadManager.pdb
+F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\bin\Debug\AWSSDK.Core.dll
+F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\bin\Debug\AWSSDK.S3.dll
+F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\bin\Debug\AWSSDK.Core.pdb
+F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\bin\Debug\AWSSDK.Core.xml
+F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\bin\Debug\AWSSDK.S3.pdb
+F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\bin\Debug\AWSSDK.S3.xml
+F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\obj\Debug\SDK.DownloadManager.dll
+F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\obj\Debug\SDK.DownloadManager.pdb
