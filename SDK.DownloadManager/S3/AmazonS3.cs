@@ -10,7 +10,8 @@ using System.Linq;
 using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
-
+using Amazon.S3.Transfer;
+using System.Threading;
 namespace SDK.DownloadManager.S3
 {
     public class AmazonS3
@@ -43,16 +44,23 @@ namespace SDK.DownloadManager.S3
         /// <returns></returns>
         public string GetLinkS3(string AccessKey, string SerectKey, string bucketName, string keyName, string endPoint)
         {
-            using (var client = new AmazonS3Client(AccessKey, SerectKey, RegionEndpointS3.ParseRegion(endPoint)))
+            try
             {
-                GetPreSignedUrlRequest request = new GetPreSignedUrlRequest
+                using (var client = new AmazonS3Client(AccessKey, SerectKey, RegionEndpointS3.ParseRegion(endPoint)))
                 {
-                    BucketName = bucketName,
-                    Key = keyName,
-                    Expires = DateTime.Now.AddHours(1),
-                    Protocol = Protocol.HTTPS
-                };
-                return client.GetPreSignedURL(request);
+                    GetPreSignedUrlRequest request = new GetPreSignedUrlRequest
+                    {
+                        BucketName = bucketName,
+                        Key = keyName,
+                        Expires = DateTime.Now.AddHours(1),
+                        Protocol = Protocol.HTTPS
+                    };
+                    return client.GetPreSignedURL(request);
+                }
+            }
+            catch(AmazonS3Exception ex)
+            {
+                throw new AmazonS3Exception(string.Format("Message {0} Error Code {1} Status Code {2}", ex.Message, ex.ErrorCode, ex.StatusCode));
             }
         }
         /// <summary>
@@ -64,17 +72,24 @@ namespace SDK.DownloadManager.S3
         /// <param name="keyName"></param>
         /// <param name="endPoint"></param>
         /// <returns></returns>
-        public List<ModelS3Bucket> GetListS3Bucket(string AccessKey, string SerectKey, string bucketName, string endPoint)
+        public List<ModelS3Bucket> GetListS3Bucket(string AccessKey, string SerectKey, string endPoint)
         {
-            using (var client = new AmazonS3Client(AccessKey, SerectKey, RegionEndpointS3.ParseRegion(endPoint)))
+            try
             {
-                var response = client.ListBuckets();
-                var List = response.Buckets.Select(x => new ModelS3Bucket
+                using (var client = new AmazonS3Client(AccessKey, SerectKey, RegionEndpointS3.ParseRegion(endPoint)))
                 {
-                    BucketName = x.BucketName,
-                    CreationDate = x.CreationDate
-                }).ToList();
-                return List;
+                    var response = client.ListBuckets();
+                    var List = response.Buckets.Select(x => new ModelS3Bucket
+                    {
+                        BucketName = x.BucketName,
+                        CreationDate = x.CreationDate
+                    }).ToList();
+                    return List;
+                }
+            }
+            catch (AmazonS3Exception ex)
+            {
+                throw new AmazonS3Exception(string.Format("Message {0} Error Code {1} Status Code {2}", ex.Message, ex.ErrorCode, ex.StatusCode));
             }
         }
         /// <summary>
@@ -88,27 +103,34 @@ namespace SDK.DownloadManager.S3
         /// <returns></returns>
         public List<ModelS3BucketObject> GetListS3BucketObject(string AccessKey, string SerectKey, string bucketName, string endPoint)
         {
-            using (var client = new AmazonS3Client(AccessKey, SerectKey, RegionEndpointS3.ParseRegion(endPoint)))
+            try
             {
-                var listRequest = new ListObjectsRequest
+                using (var client = new AmazonS3Client(AccessKey, SerectKey, RegionEndpointS3.ParseRegion(endPoint)))
                 {
-                    BucketName = bucketName,
-                };
-                ListObjectsResponse listResponse;
-                do
-                {
-                    listResponse = client.ListObjects(listRequest);
-                    var list = listResponse.S3Objects.Select(x => new ModelS3BucketObject
+                    var listRequest = new ListObjectsRequest
                     {
-                        Key = x.Key,
-                        Size = x.Size,
-                        BucketName = x.BucketName,
-                        ETag = x.ETag.Replace(@"""", string.Empty),
-                        LastModified = x.LastModified,
-                    }).ToList();
-                    return list;
+                        BucketName = bucketName,
+                    };
+                    ListObjectsResponse listResponse;
+                    do
+                    {
+                        listResponse = client.ListObjects(listRequest);
+                        var list = listResponse.S3Objects.Select(x => new ModelS3BucketObject
+                        {
+                            Key = x.Key,
+                            Size = x.Size,
+                            BucketName = x.BucketName,
+                            ETag = x.ETag.Replace(@"""", string.Empty),
+                            LastModified = x.LastModified,
+                        }).ToList();
+                        return list;
+                    }
+                    while (listResponse.IsTruncated);
                 }
-                while (listResponse.IsTruncated);
+            }
+            catch(AmazonS3Exception ex)
+            {
+                throw new AmazonS3Exception(string.Format("Message {0} Error Code {1} Status Code {2}", ex.Message, ex.ErrorCode, ex.StatusCode));
             }
         }
         /// <summary>
@@ -122,36 +144,129 @@ namespace SDK.DownloadManager.S3
         /// <returns></returns>
         public ModelS3BucketObject GetSingleObject(string AccessKey, string SerectKey, string bucketName, string keyName, string endPoint)
         {
-            using (var client = new AmazonS3Client(AccessKey, SerectKey, RegionEndpointS3.ParseRegion(endPoint)))
+            try
             {
-                var request = new GetPreSignedUrlRequest
+                using (var client = new AmazonS3Client(AccessKey, SerectKey, RegionEndpointS3.ParseRegion(endPoint)))
                 {
-                    BucketName = bucketName,
-                    Key = keyName,
-                    Expires = DateTime.Now.AddHours(1),
-                    Protocol = Protocol.HTTPS
-                };
-                //return client.GetPreSignedURL(request);
-                var listRequest = new ListObjectsRequest
-                {
-                    BucketName = bucketName,
-                };
-                ListObjectsResponse listResponse;
-                do
-                {
-                    listResponse = client.ListObjects(listRequest);
-                    var Result = listResponse.S3Objects.Select(x => new ModelS3BucketObject
+                    var request = new GetPreSignedUrlRequest
                     {
-                        Key = x.Key,
-                        Size = x.Size,
-                        BucketName = x.BucketName,
-                        ETag = x.ETag.Replace(@"""", string.Empty),
-                        Link = client.GetPreSignedURL(request),
-                        LastModified = x.LastModified
-                    }).FirstOrDefault();
-                    return Result;
+                        BucketName = bucketName,
+                        Key = keyName,
+                        Expires = DateTime.Now.AddHours(1),
+                        Protocol = Protocol.HTTPS
+                    };
+                    //return client.GetPreSignedURL(request);
+                    var listRequest = new ListObjectsRequest
+                    {
+                        BucketName = bucketName,
+                    };
+                    ListObjectsResponse listResponse;
+                    do
+                    {
+                        listResponse = client.ListObjects(listRequest);
+                        var Result = listResponse.S3Objects.Select(x => new ModelS3BucketObject
+                        {
+                            Key = x.Key,
+                            Size = x.Size,
+                            BucketName = x.BucketName,
+                            ETag = x.ETag.Replace(@"""", string.Empty),
+                            Link = client.GetPreSignedURL(request),
+                            LastModified = x.LastModified
+                        }).FirstOrDefault();
+                        return Result;
+                    }
+                    while (listResponse.IsTruncated);
                 }
-                while (listResponse.IsTruncated);
+            }
+            catch(AmazonS3Exception ex)
+            {
+                throw new AmazonS3Exception(string.Format("Message {0} Error Code {1} Status Code {2}", ex.Message, ex.ErrorCode, ex.StatusCode));
+            }
+        }
+    }
+    public class AmazoneS3Tranfer
+    {
+        public Thread ThreadDownload;
+        public Thread ThreadUpload;
+        public void DownloadFileS3Tranfer()
+        {
+            ThreadDownload = new Thread(DownloadFileS3Tranfer);
+            ThreadDownload.Start();
+        }
+        public void DownloadFileS3Tranfer(string AccessKey, string SerectKey, string bucketName, string keyName, string endPoint, string DestPath, EventHandler<WriteObjectProgressArgs> WriteObjectProgressEvent)
+        {
+            try
+            {
+                using (var client = new AmazonS3Client(AccessKey, SerectKey, RegionEndpointS3.ParseRegion(endPoint)))
+                {
+                    var downloadRequest = new TransferUtilityDownloadRequest
+                    {
+                        Key = keyName,
+                        BucketName = bucketName,
+                        FilePath = DestPath,
+                    };
+                    downloadRequest.WriteObjectProgressEvent += WriteObjectProgressEvent;
+                    using (var Utility = new TransferUtility(client))
+                    {
+                        Utility.Download(downloadRequest);
+                    }
+                }
+            }
+            catch (AmazonS3Exception ex)
+            {
+                throw new AmazonS3Exception(string.Format("Message {0} Error Code {1} Status Code {2}", ex.Message, ex.ErrorCode, ex.StatusCode));
+            }
+        }
+        public void PauseDownload()
+        {
+            if (ThreadDownload.ThreadState != ThreadState.Suspended)
+            {
+                ThreadDownload.Suspend();
+            }
+        }
+        public void ResumeDownload()
+        {
+            if (ThreadDownload.ThreadState == ThreadState.Suspended)
+            {
+                ThreadDownload.Resume();
+            }
+        }
+        public void UploadFileS3Tranfer()
+        {
+            ThreadUpload = new Thread(UploadFileS3Tranfer);
+            ThreadUpload.Start();
+        }
+        public void UploadFileS3Tranfer(string AccessKey, string SerectKey, string bucketName, string keyName, string endPoint, string Path, EventHandler<UploadProgressArgs> UploadProgressEvent)
+        {
+            try
+            {
+                using (var client = new AmazonS3Client(AccessKey, SerectKey, RegionEndpointS3.ParseRegion(endPoint)))
+                {
+                    var uploadRequest = new TransferUtilityUploadRequest
+                    {
+                        BucketName = bucketName,
+                        Key = keyName,
+                        PartSize= 6291456, // 6 MB
+                        CannedACL = S3CannedACL.PublicRead,
+                        FilePath= Path
+                    };
+                    uploadRequest.UploadProgressEvent += UploadProgressEvent;
+                    using (var Utility = new TransferUtility(client))
+                    {
+                        Utility.Upload(uploadRequest);
+                    }
+                }
+            }
+            catch (AmazonS3Exception ex)
+            {
+                throw new AmazonS3Exception(string.Format("Message {0} Error Code {1} Status Code {2}", ex.Message, ex.ErrorCode, ex.StatusCode));
+            }
+        }
+        public void CancelUpload()
+        {
+            if (ThreadUpload.ThreadState != ThreadState.Suspended)
+            {
+                ThreadUpload.Abort();
             }
         }
     }
@@ -217,5 +332,9 @@ namespace SDK.DownloadManager.S3
         public long Size { get; set; }
         public string Link { get; set; }
         public S3StorageClass StorageClass { get; set; }
+    }
+    public sealed class ModelAmazonS3Exception
+    {
+        public string ErrorCode { get; set; }
     }
 }

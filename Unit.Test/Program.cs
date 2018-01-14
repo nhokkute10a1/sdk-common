@@ -3,16 +3,23 @@ using System.IO;
 using SDK.DownloadManager.CheckSum;
 using SDK.DownloadManager.S3;
 using SDK.DownloadManager.DownloadManager;
+using Amazon.S3;
+using Amazon;
+using Amazon.S3.Model;
+using System.Threading;
+
 namespace Unit.Test
 {
     class Program
     {
+        private static ManualResetEvent mre = new ManualResetEvent(false);
+
         #region[Define-S3]
         static string bucketName = "elasticbeanstalk-us-west-1-833434519629";
         static string keyName = "20172905Bw-server-real-time-app-zplus.zip";
         static string AccessKey = "AKIAIHSNDT557FHGP3YA";
         static string SerectKey = "qQZBMAROOU50S5Mx2t+5Els5nQATvdPdFDaKybiP";
-        static string RegionEndpoint = "USWest1";
+        static string _RegionEndpoint = "USWest1";
         #endregion
 
         #region[Define-Download-Method]
@@ -21,12 +28,117 @@ namespace Unit.Test
         #endregion
 
         #region[Define-Path-Download]
-        static string LinkDownload = AmazonS3.Instance.GetLinkS3(AccessKey, SerectKey, bucketName, keyName, RegionEndpoint);
+        static string LinkDownload = AmazonS3.Instance.GetLinkS3(AccessKey, SerectKey, bucketName, keyName, _RegionEndpoint);
+        //static string LinkDownload = @"http://dl5.vtcgame.vn:2008/CF_Full_1274.zip";
         static string DestPath = @"C:\Users\asus\Downloads\20172905Bw-server-real-time-app-zplus.zip";
+        //static string DestPath = @"C:\Users\asus\Downloads\CF_Full_1274.zip";
         #endregion
-        
+
         #region[Main]
         static void Main(string[] args)
+        {
+            Thread t = new Thread(new ThreadStart(DownloadFileS3Api));
+            t.Start();
+            Console.ReadLine();
+        }
+        private static void Response_WriteObjectProgressEvent(object sender, WriteObjectProgressArgs e)
+        {
+           Console.WriteLine($"Tansfered: {e.TransferredBytes}/{e.TotalBytes} - Progress: {e.PercentDone}%");
+        }
+        #endregion
+
+        #region[Download-File-Using-S3-Api]
+        private static void DownloadFileS3Api()
+        {
+            using (var client = new AmazonS3Client(AccessKey, SerectKey, RegionEndpoint.USWest1))
+            {
+                var request = new GetObjectRequest
+                {
+                    BucketName = bucketName,
+                    Key = keyName
+                };
+
+                using (var response = client.GetObject(request))
+                {
+                    response.WriteObjectProgressEvent += Response_WriteObjectProgressEvent;
+                    response.WriteResponseStreamToFile(DestPath);
+                }
+            }
+        }
+        private static void PauseDownloadS3Api()
+        {
+            mre.WaitOne();
+        }
+        private static void ResumeDownloadS3Api()
+        {
+            mre.Set();
+        }
+        #endregion
+
+        #region[Example-Get-Object]
+        private static void GetLinkDownload()
+        {
+            var Link = AmazonS3.Instance.GetLinkS3(AccessKey, SerectKey, bucketName, keyName, _RegionEndpoint);
+            Console.WriteLine("======Result======");
+            Console.WriteLine();
+            Console.WriteLine("Link from Bucket Name And Key Name {0}", Link);
+            Console.WriteLine();
+            Console.WriteLine("======Completed======");
+        }
+        private static void GetListS3Bucket()
+        {
+            var list = AmazonS3.Instance.GetListS3Bucket(AccessKey, SerectKey, _RegionEndpoint);
+            foreach (var item in list)
+            {
+                Console.WriteLine("======Result======");
+                Console.WriteLine();
+                Console.WriteLine("BucketName   {0} CreationDate {1}", item.BucketName, item.CreationDate);
+                Console.WriteLine();
+                Console.WriteLine("======Completed======");
+            }
+        }
+        private static void GetListS3BucketObject()
+        {
+            var list = AmazonS3.Instance.GetListS3BucketObject(AccessKey, SerectKey, bucketName, _RegionEndpoint);
+            foreach (var item in list)
+            {
+                Console.WriteLine("======Result======");
+                Console.WriteLine();
+                Console.WriteLine("BucketName {0} Key {1} Size {2} ETag {3}", item.BucketName, item.Key, item.Size, item.ETag);
+                Console.WriteLine();
+                Console.WriteLine("======Completed======");
+            }
+        }
+        private static void GetSingleObject()
+        {
+            var data = AmazonS3.Instance.GetSingleObject(AccessKey, SerectKey, bucketName, keyName, _RegionEndpoint);
+            Console.WriteLine("======Result======");
+            Console.WriteLine();
+            Console.WriteLine("BucketName {0}", data.BucketName);
+            Console.WriteLine("Key {0}", data.Key);
+            Console.WriteLine("Size {0}", data.Size);
+            Console.WriteLine("ETag {0}", data.ETag);
+            Console.WriteLine("Link {0}", data.Link);
+            Console.WriteLine();
+            Console.WriteLine("======Completed======");
+        }
+        private static void CheckSumOnline()
+        {
+            var data = AmazonS3.Instance.GetSingleObject(AccessKey, SerectKey, bucketName, keyName, _RegionEndpoint);
+            Console.WriteLine("======Result======");
+            Console.WriteLine();
+            Console.WriteLine("BucketName {0}", data.BucketName);
+            Console.WriteLine("Key {0}", data.Key);
+            Console.WriteLine("ETag {0}", data.ETag);
+            Console.WriteLine("CheckSum {0}", CheckSum.Instance.CreatedCheckSumMD5Online(data.Link));
+            Console.WriteLine();
+            Console.WriteLine("======Completed======");
+        }
+        #endregion
+
+        #region[Example-Download-File]
+        /*==Run-Main==*/
+        private static void Run()
         {
             while (true)
             {
@@ -43,7 +155,7 @@ namespace Unit.Test
                     //Start Download
                     StartDownload();
                 }
-                else if(Input == "2")
+                else if (Input == "2")
                 {
                     //Pause Download
                     PauseDownload();
@@ -67,70 +179,6 @@ namespace Unit.Test
                 Console.WriteLine("Input Key Choose {0} ", Input);
             }
         }
-        #endregion
-
-        #region[Example-Get-Object]
-        private static void GetLinkDownload()
-        {
-            var Link = AmazonS3.Instance.GetLinkS3(AccessKey, SerectKey, bucketName, keyName, RegionEndpoint);
-            Console.WriteLine("======Result======");
-            Console.WriteLine();
-            Console.WriteLine("Link from Bucket Name And Key Name {0}", Link);
-            Console.WriteLine();
-            Console.WriteLine("======Completed======");
-        }
-        private static void GetListS3Bucket()
-        {
-            var list = AmazonS3.Instance.GetListS3Bucket(AccessKey, SerectKey, bucketName, RegionEndpoint);
-            foreach (var item in list)
-            {
-                Console.WriteLine("======Result======");
-                Console.WriteLine();
-                Console.WriteLine("BucketName   {0} CreationDate {1}", item.BucketName, item.CreationDate);
-                Console.WriteLine();
-                Console.WriteLine("======Completed======");
-            }
-        }
-        private static void GetListS3BucketObject()
-        {
-            var list = AmazonS3.Instance.GetListS3BucketObject(AccessKey, SerectKey, bucketName, RegionEndpoint);
-            foreach (var item in list)
-            {
-                Console.WriteLine("======Result======");
-                Console.WriteLine();
-                Console.WriteLine("BucketName {0} Key {1} Size {2} ETag {3}", item.BucketName, item.Key, item.Size, item.ETag);
-                Console.WriteLine();
-                Console.WriteLine("======Completed======");
-            }
-        }
-        private static void GetSingleObject()
-        {
-            var data = AmazonS3.Instance.GetSingleObject(AccessKey, SerectKey, bucketName, keyName, RegionEndpoint);
-            Console.WriteLine("======Result======");
-            Console.WriteLine();
-            Console.WriteLine("BucketName {0}", data.BucketName);
-            Console.WriteLine("Key {0}", data.Key);
-            Console.WriteLine("Size {0}", data.Size);
-            Console.WriteLine("ETag {0}", data.ETag);
-            Console.WriteLine("Link {0}", data.Link);
-            Console.WriteLine();
-            Console.WriteLine("======Completed======");
-        }
-        private static void CheckSumOnline()
-        {
-            var data = AmazonS3.Instance.GetSingleObject(AccessKey, SerectKey, bucketName, keyName, RegionEndpoint);
-            Console.WriteLine("======Result======");
-            Console.WriteLine();
-            Console.WriteLine("BucketName {0}", data.BucketName);
-            Console.WriteLine("Key {0}", data.Key);
-            Console.WriteLine("ETag {0}", data.ETag);
-            Console.WriteLine("CheckSum {0}", CheckSum.Instance.CreatedCheckSumMD5Online(data.Link));
-            Console.WriteLine();
-            Console.WriteLine("======Completed======");
-        }
-        #endregion
-
-        #region[Example-Download-File]
         /*==Method-Tutorial==*/
         private static void Tutorial()
         {
