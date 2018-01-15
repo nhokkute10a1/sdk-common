@@ -69,6 +69,11 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPageUpload = new System.Windows.Forms.TabPage();
+            this.groupUploadAllFile = new System.Windows.Forms.GroupBox();
+            this.txtDirUpload = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.btnChooseDirUpload = new System.Windows.Forms.Button();
+            this.btnDirUpload = new System.Windows.Forms.Button();
             this.groupBucketInfoUpload = new System.Windows.Forms.GroupBox();
             this.DgBucketInfoUpload = new System.Windows.Forms.DataGridView();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -88,6 +93,10 @@
             this.btnStartUpload = new System.Windows.Forms.Button();
             this.btnChooseFileUpload = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
+            this.lbStatusDirUpload = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
+            this.lbCurrentFileUploadDir = new System.Windows.Forms.Label();
             this.tabManager.SuspendLayout();
             this.tabPageDownload.SuspendLayout();
             this.GroupDownload.SuspendLayout();
@@ -97,6 +106,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.DgBucketDetail)).BeginInit();
             this.groupSecurity.SuspendLayout();
             this.tabPageUpload.SuspendLayout();
+            this.groupUploadAllFile.SuspendLayout();
             this.groupBucketInfoUpload.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DgBucketInfoUpload)).BeginInit();
             this.groupUpload.SuspendLayout();
@@ -517,6 +527,7 @@
             // 
             // tabPageUpload
             // 
+            this.tabPageUpload.Controls.Add(this.groupUploadAllFile);
             this.tabPageUpload.Controls.Add(this.groupBucketInfoUpload);
             this.tabPageUpload.Controls.Add(this.groupUpload);
             this.tabPageUpload.Location = new System.Drawing.Point(4, 26);
@@ -526,6 +537,60 @@
             this.tabPageUpload.TabIndex = 1;
             this.tabPageUpload.Text = "Upload";
             this.tabPageUpload.UseVisualStyleBackColor = true;
+            // 
+            // groupUploadAllFile
+            // 
+            this.groupUploadAllFile.Controls.Add(this.txtDirUpload);
+            this.groupUploadAllFile.Controls.Add(this.label15);
+            this.groupUploadAllFile.Controls.Add(this.btnChooseDirUpload);
+            this.groupUploadAllFile.Controls.Add(this.btnDirUpload);
+            this.groupUploadAllFile.Controls.Add(this.lbCurrentFileUploadDir);
+            this.groupUploadAllFile.Controls.Add(this.lbStatusDirUpload);
+            this.groupUploadAllFile.Controls.Add(this.label17);
+            this.groupUploadAllFile.Controls.Add(this.label16);
+            this.groupUploadAllFile.Location = new System.Drawing.Point(428, 169);
+            this.groupUploadAllFile.Name = "groupUploadAllFile";
+            this.groupUploadAllFile.Size = new System.Drawing.Size(479, 222);
+            this.groupUploadAllFile.TabIndex = 6;
+            this.groupUploadAllFile.TabStop = false;
+            this.groupUploadAllFile.Text = "Upload File In Directory";
+            // 
+            // txtDirUpload
+            // 
+            this.txtDirUpload.Enabled = false;
+            this.txtDirUpload.Location = new System.Drawing.Point(48, 54);
+            this.txtDirUpload.Name = "txtDirUpload";
+            this.txtDirUpload.Size = new System.Drawing.Size(316, 25);
+            this.txtDirUpload.TabIndex = 1;
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(7, 57);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(35, 17);
+            this.label15.TabIndex = 0;
+            this.label15.Text = "Path";
+            // 
+            // btnChooseDirUpload
+            // 
+            this.btnChooseDirUpload.Location = new System.Drawing.Point(370, 54);
+            this.btnChooseDirUpload.Name = "btnChooseDirUpload";
+            this.btnChooseDirUpload.Size = new System.Drawing.Size(30, 25);
+            this.btnChooseDirUpload.TabIndex = 2;
+            this.btnChooseDirUpload.Text = "...";
+            this.btnChooseDirUpload.UseVisualStyleBackColor = true;
+            this.btnChooseDirUpload.Click += new System.EventHandler(this.BtnChooseDirUpload_Click);
+            // 
+            // btnDirUpload
+            // 
+            this.btnDirUpload.Location = new System.Drawing.Point(10, 24);
+            this.btnDirUpload.Name = "btnDirUpload";
+            this.btnDirUpload.Size = new System.Drawing.Size(115, 23);
+            this.btnDirUpload.TabIndex = 10;
+            this.btnDirUpload.Text = "&Start Upload";
+            this.btnDirUpload.UseVisualStyleBackColor = true;
+            this.btnDirUpload.Click += new System.EventHandler(this.BtnDirUpload_Click);
             // 
             // groupBucketInfoUpload
             // 
@@ -721,6 +786,42 @@
             this.label10.TabIndex = 0;
             this.label10.Text = "Path";
             // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(11, 145);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(90, 17);
+            this.label16.TabIndex = 7;
+            this.label16.Text = "Status Upload";
+            // 
+            // lbStatusDirUpload
+            // 
+            this.lbStatusDirUpload.AutoSize = true;
+            this.lbStatusDirUpload.Location = new System.Drawing.Point(152, 145);
+            this.lbStatusDirUpload.Name = "lbStatusDirUpload";
+            this.lbStatusDirUpload.Size = new System.Drawing.Size(15, 17);
+            this.lbStatusDirUpload.TabIndex = 5;
+            this.lbStatusDirUpload.Text = "0";
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(11, 173);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(78, 17);
+            this.label17.TabIndex = 7;
+            this.label17.Text = "Current File";
+            // 
+            // lbCurrentFileUploadDir
+            // 
+            this.lbCurrentFileUploadDir.AutoSize = true;
+            this.lbCurrentFileUploadDir.Location = new System.Drawing.Point(152, 173);
+            this.lbCurrentFileUploadDir.Name = "lbCurrentFileUploadDir";
+            this.lbCurrentFileUploadDir.Size = new System.Drawing.Size(15, 17);
+            this.lbCurrentFileUploadDir.TabIndex = 5;
+            this.lbCurrentFileUploadDir.Text = "0";
+            // 
             // AmazonManager
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 17F);
@@ -746,6 +847,8 @@
             this.groupSecurity.ResumeLayout(false);
             this.groupSecurity.PerformLayout();
             this.tabPageUpload.ResumeLayout(false);
+            this.groupUploadAllFile.ResumeLayout(false);
+            this.groupUploadAllFile.PerformLayout();
             this.groupBucketInfoUpload.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.DgBucketInfoUpload)).EndInit();
             this.groupUpload.ResumeLayout(false);
@@ -816,5 +919,14 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ETag;
         private System.Windows.Forms.DataGridViewTextBoxColumn LastModified;
         private System.Windows.Forms.Button btnCancelUpload;
+        private System.Windows.Forms.GroupBox groupUploadAllFile;
+        private System.Windows.Forms.TextBox txtDirUpload;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Button btnChooseDirUpload;
+        private System.Windows.Forms.Button btnDirUpload;
+        private System.Windows.Forms.Label lbStatusDirUpload;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label lbCurrentFileUploadDir;
+        private System.Windows.Forms.Label label17;
     }
 }

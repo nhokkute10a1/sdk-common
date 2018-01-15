@@ -111,7 +111,7 @@ namespace UnitTestForm
         {
             using (var DiaLog = new OpenFileDialog())
             {
-                DiaLog.Title = "Lưu tệp tin";
+                DiaLog.Title = "Chọn tệp tin";
                 DiaLog.Filter = "Tệp tin (*zip*)|*.*";
                 DiaLog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 if (DiaLog.ShowDialog() == DialogResult.OK)
@@ -130,6 +130,23 @@ namespace UnitTestForm
                 lbBucketNameUpload.Text = BucketName;
                 btnStartUpload.Enabled = true;
                 btnChooseFileUpload.Enabled = true;
+            }
+        }
+        #endregion
+
+        #region[Upload-Folder]
+        private void BtnDirUpload_Click(object sender, EventArgs e)
+        {
+            UploadDir();
+        }
+        private void BtnChooseDirUpload_Click(object sender, EventArgs e)
+        {
+            using (var DiaLog = new FolderBrowserDialog())
+            {
+                if (DiaLog.ShowDialog() == DialogResult.OK)
+                {
+                    txtDirUpload.Text = DiaLog.SelectedPath;
+                }
             }
         }
         #endregion
@@ -194,6 +211,15 @@ namespace UnitTestForm
                 IsBackground = false
             };
             _S3Amazon.ThreadUpload.Start();
+        }
+        private void UploadDir()
+        {
+            _S3Amazon.ThreadUploadDir = new Thread(TranferUploadDir)
+            {
+                Name = "ThreadUploadDir",
+                IsBackground = false
+            };
+            _S3Amazon.ThreadUploadDir.Start();
         }
         #endregion
 
@@ -353,6 +379,28 @@ namespace UnitTestForm
                 MessageBox.Show("Cancel Upload " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        private void TranferUploadDir()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(txtDirUpload.Text))
+                {
+                    MessageBox.Show("Vui lòng chọn thư mục tải lên", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    Invoke((Action)(() =>
+                    {
+                        
+                    }));
+                    _S3Amazon.UploadDirS3Tranfer(txtAccessKey.Text, txtSerectKey.Text, lbBucketNameUpload.Text, txtRegion.Text, txtDirUpload.Text, OnUploadDirProcess);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
         #endregion
 
         #region[Method-S3-Download]
@@ -463,6 +511,31 @@ namespace UnitTestForm
                     groupBucketInfoUpload.Enabled = true;
                 }
                 lbStatusUpload.Text = status;
+            }));
+        }
+        private void OnUploadDirProcess(object sender, UploadDirectoryProgressArgs e)
+        {
+            var status = string.Format("{0} MB's / {1} MB's - Number of File {2}",
+                (e.TransferredBytes / 1024d / 1024d).ToString("0.00"),
+                (e.TotalBytes / 1024d / 1024d).ToString("0.00"),
+                (e.NumberOfFilesUploaded));
+            Invoke((Action)(() =>
+            {
+                //ProcessUpload.Value = e.PercentDone;
+                //lbPercentUpload.Text = e.PercentDone.ToString() + "%";
+                //if (e.PercentDone == 100)
+                //{
+                //    status = "Upload Completed";
+                //    btnChooseFileUpload.Enabled = false;
+                //    btnStartUpload.Enabled = false;
+                //    btnCancelUpload.Enabled = false;
+                //    txtPathUpload.Text = string.Empty;
+                //    lbBucketNameUpload.Text = string.Empty;
+                //    txtBuketKeyUpload.Text = string.Empty;
+                //    groupBucketInfoUpload.Enabled = true;
+                //}
+                lbCurrentFileUploadDir.Text = e.CurrentFile;
+                lbStatusDirUpload.Text = status;
             }));
         }
         #endregion

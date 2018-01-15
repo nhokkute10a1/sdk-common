@@ -1,0 +1,14 @@
+F:\Application\Net3.5\SDK.Common\Unit.Test1\bin\Release\Unit.Test1.exe
+F:\Application\Net3.5\SDK.Common\Unit.Test1\bin\Release\Unit.Test1.pdb
+F:\Application\Net3.5\SDK.Common\Unit.Test1\bin\Release\AWSSDK.Core.dll
+F:\Application\Net3.5\SDK.Common\Unit.Test1\bin\Release\AWSSDK.S3.dll
+F:\Application\Net3.5\SDK.Common\Unit.Test1\bin\Release\SDK.DownloadManager.dll
+F:\Application\Net3.5\SDK.Common\Unit.Test1\bin\Release\SDK.DownloadManager.pdb
+F:\Application\Net3.5\SDK.Common\Unit.Test1\bin\Release\AWSSDK.Core.pdb
+F:\Application\Net3.5\SDK.Common\Unit.Test1\bin\Release\AWSSDK.Core.xml
+F:\Application\Net3.5\SDK.Common\Unit.Test1\bin\Release\AWSSDK.S3.pdb
+F:\Application\Net3.5\SDK.Common\Unit.Test1\bin\Release\AWSSDK.S3.xml
+F:\Application\Net3.5\SDK.Common\Unit.Test1\obj\Release\Unit.Test1.csprojResolveAssemblyReference.cache
+F:\Application\Net3.5\SDK.Common\Unit.Test1\obj\Release\Unit.Test1.csproj.CoreCompileInputs.cache
+F:\Application\Net3.5\SDK.Common\Unit.Test1\obj\Release\Unit.Test1.exe
+F:\Application\Net3.5\SDK.Common\Unit.Test1\obj\Release\Unit.Test1.pdb

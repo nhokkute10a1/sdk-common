@@ -58,7 +58,7 @@ namespace SDK.DownloadManager.S3
                     return client.GetPreSignedURL(request);
                 }
             }
-            catch(AmazonS3Exception ex)
+            catch (AmazonS3Exception ex)
             {
                 throw new AmazonS3Exception(string.Format("Message {0} Error Code {1} Status Code {2}", ex.Message, ex.ErrorCode, ex.StatusCode));
             }
@@ -128,7 +128,7 @@ namespace SDK.DownloadManager.S3
                     while (listResponse.IsTruncated);
                 }
             }
-            catch(AmazonS3Exception ex)
+            catch (AmazonS3Exception ex)
             {
                 throw new AmazonS3Exception(string.Format("Message {0} Error Code {1} Status Code {2}", ex.Message, ex.ErrorCode, ex.StatusCode));
             }
@@ -178,7 +178,7 @@ namespace SDK.DownloadManager.S3
                     while (listResponse.IsTruncated);
                 }
             }
-            catch(AmazonS3Exception ex)
+            catch (AmazonS3Exception ex)
             {
                 throw new AmazonS3Exception(string.Format("Message {0} Error Code {1} Status Code {2}", ex.Message, ex.ErrorCode, ex.StatusCode));
             }
@@ -188,6 +188,10 @@ namespace SDK.DownloadManager.S3
     {
         public Thread ThreadDownload;
         public Thread ThreadUpload;
+        public Thread ThreadUploadDir;
+        /// <summary>
+        /// DownloadFileS3Tranfer
+        /// </summary>
         public void DownloadFileS3Tranfer()
         {
             ThreadDownload = new Thread(DownloadFileS3Tranfer);
@@ -217,6 +221,9 @@ namespace SDK.DownloadManager.S3
                 throw new AmazonS3Exception(string.Format("Message {0} Error Code {1} Status Code {2}", ex.Message, ex.ErrorCode, ex.StatusCode));
             }
         }
+        /// <summary>
+        /// PauseDownload
+        /// </summary>
         public void PauseDownload()
         {
             if (ThreadDownload.ThreadState != ThreadState.Suspended)
@@ -224,6 +231,9 @@ namespace SDK.DownloadManager.S3
                 ThreadDownload.Suspend();
             }
         }
+        /// <summary>
+        /// ResumeDownload
+        /// </summary>
         public void ResumeDownload()
         {
             if (ThreadDownload.ThreadState == ThreadState.Suspended)
@@ -231,6 +241,9 @@ namespace SDK.DownloadManager.S3
                 ThreadDownload.Resume();
             }
         }
+        /// <summary>
+        /// UploadFileS3Tranfer
+        /// </summary>
         public void UploadFileS3Tranfer()
         {
             ThreadUpload = new Thread(UploadFileS3Tranfer);
@@ -246,9 +259,9 @@ namespace SDK.DownloadManager.S3
                     {
                         BucketName = bucketName,
                         Key = keyName,
-                        PartSize= 6291456, // 6 MB
+                        PartSize = 6291456, // 6 MB
                         CannedACL = S3CannedACL.PublicRead,
-                        FilePath= Path
+                        FilePath = Path
                     };
                     uploadRequest.UploadProgressEvent += UploadProgressEvent;
                     using (var Utility = new TransferUtility(client))
@@ -262,11 +275,49 @@ namespace SDK.DownloadManager.S3
                 throw new AmazonS3Exception(string.Format("Message {0} Error Code {1} Status Code {2}", ex.Message, ex.ErrorCode, ex.StatusCode));
             }
         }
+        /// <summary>
+        /// CancelUpload
+        /// </summary>
         public void CancelUpload()
         {
             if (ThreadUpload.ThreadState != ThreadState.Suspended)
             {
                 ThreadUpload.Abort();
+            }
+        }
+        /// <summary>
+        /// UploadDirS3Tranfer
+        /// </summary>
+        public void UploadDirS3Tranfer()
+        {
+            ThreadUploadDir = new Thread(UploadDirS3Tranfer);
+            ThreadUploadDir.Start();
+        }
+        public void UploadDirS3Tranfer(string AccessKey, string SerectKey, string bucketName, string endPoint, string DirectoryPath, EventHandler<UploadDirectoryProgressArgs> UploadProgressEvent = null)
+        {
+            try
+            {
+                using (var client = new AmazonS3Client(AccessKey, SerectKey, RegionEndpointS3.ParseRegion(endPoint)))
+                {
+                    var uploadRequest = new TransferUtilityUploadDirectoryRequest
+                    {
+                        Directory = DirectoryPath,
+                        BucketName = bucketName,
+                        SearchPattern = "*.zip",
+                        SearchOption = System.IO.SearchOption.AllDirectories,
+                        KeyPrefix = Guid.NewGuid().ToString(),
+                        CannedACL = S3CannedACL.PublicRead
+                    };
+                    uploadRequest.UploadDirectoryProgressEvent += UploadProgressEvent;
+                    using (var Utility = new TransferUtility(client))
+                    {
+                        Utility.UploadDirectory(uploadRequest);
+                    }
+                }
+            }
+            catch (AmazonS3Exception ex)
+            {
+                throw new AmazonS3Exception(string.Format("Message {0} Error Code {1} Status Code {2}", ex.Message, ex.ErrorCode, ex.StatusCode));
             }
         }
     }

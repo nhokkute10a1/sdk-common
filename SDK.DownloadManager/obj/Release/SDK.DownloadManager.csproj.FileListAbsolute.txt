@@ -9,3 +9,4 @@ F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\bin\Release\AWSSDK.S3.xml
 F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\obj\Release\SDK.DownloadManager.csproj.CoreCompileInputs.cache
 F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\obj\Release\SDK.DownloadManager.dll
 F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\obj\Release\SDK.DownloadManager.pdb
+F:\Application\Net3.5\SDK.Common\SDK.DownloadManager\obj\Release\SDK.DownloadManager.csprojResolveAssemblyReference.cache
